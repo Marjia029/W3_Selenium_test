@@ -1,0 +1,39 @@
+# Python
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+*.log
+
+# Virtual Environment
+.venv/
+venv/
+env/
+
+# IDE and Editor Configs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+
+# Selenium WebDriver files
+chromedriver/
+geckodriver/
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+
+# CSV Reports
+/reports/*.csv
+
+# Other files that should not be committed
+*.env
