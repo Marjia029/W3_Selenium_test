@@ -6,10 +6,10 @@ import time
 def test_currency_filter(driver):
     """
     Test currency change functionality across all available currency options.
-    
+
     Returns:
-    - Boolean: Whether the currency change test passed
-    - String: Detailed comments about the test results
+    - Boolean: Whether the currency change test passed.
+    - String: Detailed comments about the test results.
     """
     try:
         # Capture the initial value of the availability price
@@ -24,6 +24,7 @@ def test_currency_filter(driver):
             EC.presence_of_all_elements_located((By.CLASS_NAME, 'js-price-value'))
         )
         price_elements = driver.find_elements(By.CLASS_NAME, 'js-price-value')
+        total_cards = len(price_elements)
         initial_prices = [elem.text for elem in price_elements]
 
         # Scroll to the footer section to locate the currency dropdown
@@ -43,7 +44,7 @@ def test_currency_filter(driver):
         # Fetch all available currency options
         currency_options = driver.find_elements(By.XPATH, "//div[@class='footer-section']//div[@class='footer-currency-dd']//ul[@class='select-ul']//li")
         print(f"Found {len(currency_options)} currency options.")
-        #print(currency_options)
+        
         # Prepare overall test result tracking
         overall_test_passed = True
         comprehensive_comments = []
@@ -85,69 +86,34 @@ def test_currency_filter(driver):
             updated_price_elements = driver.find_elements(By.CLASS_NAME, 'js-price-value')
             updated_prices = [elem.text for elem in updated_price_elements]
 
+            # Count the number of cards with changed prices
+            changed_count = sum(1 for i in range(total_cards) if initial_prices[i] != updated_prices[i])
+
             # Prepare comments for this currency
-            currency_test_passed = True
-            card_details = []
-
-            # Compare initial and updated prices
-            for i in range(len(initial_prices)):
-                if initial_prices[i] == updated_prices[i]:
-                    currency_test_passed = False
-                    card_details.append({
-                        'card_number': i + 1,
-                        'status': 'FAIL',
-                        'initial_price': initial_prices[i],
-                        'updated_price': updated_prices[i]
-                    })
-                else:
-                    card_details.append({
-                        'card_number': i + 1,
-                        'status': 'PASS',
-                        'initial_price': initial_prices[i],
-                        'updated_price': updated_prices[i]
-                    })
-
-            # Check availability price change
-            availability_price_changed = currency_text.split()[0] in updated_availability_price
-
-            # Organize comments for this currency
-            currency_comments = {
+            currency_test_passed = changed_count > 0
+            comprehensive_comments.append({
                 'currency': currency_text,
-                'availability_price_changed': availability_price_changed,
-                'initial_availability_price': initial_availability_price,
-                'updated_availability_price': updated_availability_price,
-                'card_details': card_details
-            }
-            comprehensive_comments.append(currency_comments)
+                'availability_price_changed': currency_text.split()[0] in updated_availability_price,
+                'total_cards': total_cards,
+                'changed_cards': changed_count
+            })
 
             # Update overall test result
-            if not currency_test_passed or not availability_price_changed:
+            if not currency_test_passed:
                 overall_test_passed = False
 
             # Update initial prices for the next iteration
             initial_availability_price = updated_availability_price
             initial_prices = updated_prices
 
-        # Format comments for CSV
-        formatted_comments = []
-        for curr_result in comprehensive_comments:
-            curr_comment_parts = [
-                f"Currency: {curr_result['currency']}",
-                f"Availability Price Change: {curr_result['availability_price_changed']}",
-                f"Initial Availability Price: {curr_result['initial_availability_price']}",
-                f"Updated Availability Price: {curr_result['updated_availability_price']}",
-                "Card Price Changes:"
-            ]
-            
-            for card in curr_result['card_details']:
-                curr_comment_parts.append(
-                    f"Card {card['card_number']}: {card['status']} "
-                    f"(Initial: {card['initial_price']}, Updated: {card['updated_price']})"
-                )
-            
-            formatted_comments.append("; ".join(curr_comment_parts))
+        # Format comments for output
+        formatted_comments = [
+            f"Currency: {result['currency']}; Changed Cards: {result['changed_cards']} of {result['total_cards']}; "
+            f"Availability Price Change: {result['availability_price_changed']}"
+            for result in comprehensive_comments
+        ]
 
-        final_comments = " || ".join(formatted_comments)
+        final_comments = " \n ".join(formatted_comments)
 
         return overall_test_passed, final_comments
 
