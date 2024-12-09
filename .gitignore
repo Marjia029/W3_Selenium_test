@@ -37,3 +37,5 @@ Thumbs.db
 
 # Other files that should not be committed
 *.env
+*.xlsx
+*.csv
