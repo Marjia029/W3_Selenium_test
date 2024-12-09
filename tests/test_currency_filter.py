@@ -5,11 +5,11 @@ import time
 
 def test_currency_filter(driver):
     """
-    Test currency change functionality on the property page.
+    Test currency change functionality across all available currency options.
     
     Returns:
     - Boolean: Whether the currency change test passed
-    - String: Comments about the test results
+    - String: Detailed comments about the test results
     """
     try:
         # Capture the initial value of the availability price
@@ -17,6 +17,7 @@ def test_currency_filter(driver):
             EC.presence_of_element_located((By.ID, 'js-default-price'))
         )
         initial_availability_price = availability_price_element.text.strip()
+        print(f"Initial Availability Price: {initial_availability_price}")
 
         # Wait for the price elements to load in cards
         WebDriverWait(driver, 10).until(
@@ -41,15 +42,27 @@ def test_currency_filter(driver):
 
         # Fetch all available currency options
         currency_options = driver.find_elements(By.XPATH, "//div[@class='footer-section']//div[@class='footer-currency-dd']//ul[@class='select-ul']//li")
-
-        # Track overall test result
+        print(f"Found {len(currency_options)} currency options.")
+        #print(currency_options)
+        # Prepare overall test result tracking
         overall_test_passed = True
-        test_comments = []
+        comprehensive_comments = []
 
-        # Test the first currency option (skipping the first if it's the default)
-        if len(currency_options) > 1:
-            currency_option = currency_options[1]  # Select the second option
+        # Skip the first currency option (likely the default)
+        for currency_option in currency_options[0:]:
+            # Reset currency dropdown
+            currency_dropdown = WebDriverWait(driver, 60).until(
+                EC.element_to_be_clickable((By.ID, 'js-currency-sort-footer'))
+            )
+            driver.execute_script("arguments[0].scrollIntoView(true);", currency_dropdown)
+            currency_dropdown.click()
+
+            # Get current currency text
             currency_text = currency_option.text.strip()
+            
+            # Skip empty options
+            if not currency_text:
+                continue
 
             # Scroll to and click on the currency option
             driver.execute_script("arguments[0].scrollIntoView(true);", currency_option)
@@ -72,32 +85,71 @@ def test_currency_filter(driver):
             updated_price_elements = driver.find_elements(By.CLASS_NAME, 'js-price-value')
             updated_prices = [elem.text for elem in updated_price_elements]
 
+            # Prepare comments for this currency
+            currency_test_passed = True
+            card_details = []
+
             # Compare initial and updated prices
-            price_changes = []
             for i in range(len(initial_prices)):
                 if initial_prices[i] == updated_prices[i]:
-                    price_changes.append(False)
-                    overall_test_passed = False
+                    currency_test_passed = False
+                    card_details.append({
+                        'card_number': i + 1,
+                        'status': 'FAIL',
+                        'initial_price': initial_prices[i],
+                        'updated_price': updated_prices[i]
+                    })
                 else:
-                    price_changes.append(True)
+                    card_details.append({
+                        'card_number': i + 1,
+                        'status': 'PASS',
+                        'initial_price': initial_prices[i],
+                        'updated_price': updated_prices[i]
+                    })
 
             # Check availability price change
             availability_price_changed = currency_text.split()[0] in updated_availability_price
 
-            # Prepare comments
-            comments_list = [
-                f"Tested currency change to {currency_text}",
-                f"Availability Price Change: {'Yes' if availability_price_changed else 'No'}",
-                f"Price Changes: {sum(price_changes)}/{len(price_changes)} card prices updated",
+            # Organize comments for this currency
+            currency_comments = {
+                'currency': currency_text,
+                'availability_price_changed': availability_price_changed,
+                'initial_availability_price': initial_availability_price,
+                'updated_availability_price': updated_availability_price,
+                'card_details': card_details
+            }
+            comprehensive_comments.append(currency_comments)
+
+            # Update overall test result
+            if not currency_test_passed or not availability_price_changed:
+                overall_test_passed = False
+
+            # Update initial prices for the next iteration
+            initial_availability_price = updated_availability_price
+            initial_prices = updated_prices
+
+        # Format comments for CSV
+        formatted_comments = []
+        for curr_result in comprehensive_comments:
+            curr_comment_parts = [
+                f"Currency: {curr_result['currency']}",
+                f"Availability Price Change: {curr_result['availability_price_changed']}",
+                f"Initial Availability Price: {curr_result['initial_availability_price']}",
+                f"Updated Availability Price: {curr_result['updated_availability_price']}",
+                "Card Price Changes:"
             ]
-            test_comments = "; ".join(comments_list)
+            
+            for card in curr_result['card_details']:
+                curr_comment_parts.append(
+                    f"Card {card['card_number']}: {card['status']} "
+                    f"(Initial: {card['initial_price']}, Updated: {card['updated_price']})"
+                )
+            
+            formatted_comments.append("; ".join(curr_comment_parts))
 
-        else:
-            # Not enough currency options to test
-            overall_test_passed = False
-            test_comments = "Insufficient currency options to perform test"
+        final_comments = " || ".join(formatted_comments)
 
-        return overall_test_passed, test_comments
+        return overall_test_passed, final_comments
 
     except Exception as e:
         return False, f"Currency filter test failed: {str(e)}"
