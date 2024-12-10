@@ -42,3 +42,9 @@ Thumbs.db
 *.csv
 *.xlsx#
 /reports/*.xlsx#
+
+# Specific local files to ignore
+help.txt
+test.py
+test_currency_change.py
+test_scrape_data.py
