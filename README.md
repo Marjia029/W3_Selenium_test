@@ -71,7 +71,9 @@ W3_Selenium_test/
 │   └── test_report.xlsx
 │
 ├── requirements.txt        # Project dependencies
+├── .gitignore              # Git ignore file
 └── README.md               # Project documentation
+
 ```
 
 ## Installation
