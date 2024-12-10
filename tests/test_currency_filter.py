@@ -22,7 +22,9 @@ def test_currency_filter(driver):
 
         # Wait for the price elements to load in cards
         WebDriverWait(driver, 10).until(
-            EC.presence_of_all_elements_located((By.CLASS_NAME, 'js-price-value'))
+            EC.presence_of_all_elements_located(
+                (By.CLASS_NAME, 'js-price-value')
+            )
         )
         price_elements = driver.find_elements(By.CLASS_NAME, 'js-price-value')
         total_cards = len(price_elements)
@@ -32,8 +34,12 @@ def test_currency_filter(driver):
         WebDriverWait(driver, 20).until(
             EC.presence_of_element_located((By.ID, 'js-currency-sort-footer'))
         )
-        footer_currency_element = driver.find_element(By.ID, 'js-currency-sort-footer')
-        driver.execute_script("arguments[0].scrollIntoView(true);", footer_currency_element)
+        footer_currency_element = driver.find_element(
+            By.ID, 'js-currency-sort-footer'
+        )
+        driver.execute_script(
+            "arguments[0].scrollIntoView(true);", footer_currency_element
+        )
         time.sleep(1)  # Wait for the scroll to complete
 
         # Click on the currency dropdown
@@ -43,9 +49,12 @@ def test_currency_filter(driver):
         currency_dropdown.click()
 
         # Fetch all available currency options
-        currency_options = driver.find_elements(By.XPATH, "//div[@class='footer-section']//div[@class='footer-currency-dd']//ul[@class='select-ul']//li")
+        currency_options = driver.find_elements(
+            By.XPATH,
+            "//div[@class='footer-section']//div[@class='footer-currency-dd']//ul[@class='select-ul']//li"
+        )
         print(f"Found {len(currency_options)} currency options.")
-        
+
         # Prepare overall test result tracking
         overall_test_passed = True
         comprehensive_comments = []
@@ -56,18 +65,22 @@ def test_currency_filter(driver):
             currency_dropdown = WebDriverWait(driver, 60).until(
                 EC.element_to_be_clickable((By.ID, 'js-currency-sort-footer'))
             )
-            driver.execute_script("arguments[0].scrollIntoView(true);", currency_dropdown)
+            driver.execute_script(
+                "arguments[0].scrollIntoView(true);", currency_dropdown
+            )
             currency_dropdown.click()
 
             # Get current currency text
             currency_text = currency_option.text.strip()
-            
+
             # Skip empty options
             if not currency_text:
                 continue
 
             # Scroll to and click on the currency option
-            driver.execute_script("arguments[0].scrollIntoView(true);", currency_option)
+            driver.execute_script(
+                "arguments[0].scrollIntoView(true);", currency_option
+            )
             time.sleep(1)
             try:
                 currency_option.click()
@@ -76,25 +89,36 @@ def test_currency_filter(driver):
 
             # Wait for the availability price to update
             WebDriverWait(driver, 50).until(
-                EC.text_to_be_present_in_element((By.ID, 'js-default-price'), currency_text.split()[0])
+                EC.text_to_be_present_in_element(
+                    (By.ID, 'js-default-price'), currency_text.split()[0]
+                )
             )
             updated_availability_price = availability_price_element.text.strip()
 
             # Wait for the prices to update in the cards
             WebDriverWait(driver, 50).until(
-                EC.text_to_be_present_in_element((By.CLASS_NAME, 'js-price-value'), currency_text.split()[0])
+                EC.text_to_be_present_in_element(
+                    (By.CLASS_NAME, 'js-price-value'), currency_text.split()[0]
+                )
             )
-            updated_price_elements = driver.find_elements(By.CLASS_NAME, 'js-price-value')
+            updated_price_elements = driver.find_elements(
+                By.CLASS_NAME, 'js-price-value'
+            )
             updated_prices = [elem.text for elem in updated_price_elements]
 
             # Count the number of cards with changed prices
-            changed_count = sum(1 for i in range(total_cards) if initial_prices[i] != updated_prices[i])
+            changed_count = sum(
+                1 for i in range(total_cards)
+                if initial_prices[i] != updated_prices[i]
+            )
 
             # Prepare comments for this currency
             currency_test_passed = changed_count > 0
             comprehensive_comments.append({
                 'currency': currency_text,
-                'availability_price_changed': currency_text.split()[0] in updated_availability_price,
+                'availability_price_changed': (
+                    currency_text.split()[0] in updated_availability_price
+                ),
                 'total_cards': total_cards,
                 'changed_cards': changed_count
             })
@@ -109,8 +133,9 @@ def test_currency_filter(driver):
 
         # Format comments for output
         formatted_comments = [
-            f"Currency: {result['currency']}; Changed Cards: {result['changed_cards']} of {result['total_cards']}; "
-            f"Availability Price Change: {result['availability_price_changed']}"
+            f"Currency: {result['currency']}; Changed Cards: {result['changed_cards']} "
+            f"of {result['total_cards']}; Availability Price Change: "
+            f"{result['availability_price_changed']}"
             for result in comprehensive_comments
         ]
 
