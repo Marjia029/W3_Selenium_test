@@ -3,6 +3,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
 
+
 def test_currency_filter(driver):
     """
     Test currency change functionality across all available currency options.
