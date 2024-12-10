@@ -1,5 +1,7 @@
-import json
+import pandas as pd
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from openpyxl import load_workbook
 
 def test_scrape_data(driver):
     """
@@ -31,17 +33,36 @@ def test_scrape_data(driver):
         country_code = script_data.get("userInfo", {}).get("CountryCode", "N/A")
         ip = script_data.get("userInfo", {}).get("IP", "N/A")
 
-        # Prepare comments with scraped data
-        comments = json.dumps({
+        # Store the extracted data in a dictionary
+        data = {
             "SiteURL": site_url,
             "CampaignID": campaign_id,
             "SiteName": site_name,
             "Browser": browser,
             "CountryCode": country_code,
             "IP": ip
-        }, indent=2)
+        }
+
+        # Save data to a pandas DataFrame
+        df = pd.DataFrame([data])
+
+        # Save data into a new sheet in test_report.xlsx
+        report_path = "reports/test_report.xlsx"
+        sheet_name = "ScriptData"
+
+        # Check if the file exists
+        try:
+            with pd.ExcelWriter(report_path, engine='openpyxl', mode='a', if_sheet_exists='replace') as writer:
+                df.to_excel(writer, sheet_name=sheet_name, index=False)
+        except FileNotFoundError:
+            # Create a new workbook if it doesn't exist
+            with pd.ExcelWriter(report_path, engine='openpyxl') as writer:
+                df.to_excel(writer, sheet_name=sheet_name, index=False)
         
-        return True, comments
+        # Prepare comments with scraped data
+        comments = "\n".join([f"{k}: {v}" for k, v in data.items()])
+        
+        return True, f"ScriptData successfully scraped and saved to {report_path} in sheet '{sheet_name}'\n{comments}"
     
     except Exception as e:
         return False, f"Error scraping ScriptData: {str(e)}"
