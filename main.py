@@ -1,3 +1,4 @@
+import argparse
 from utils.driver_setup import setup_driver
 from utils.test_utils import run_test
 from tests.test_h1_tag import test_h1_tag
@@ -8,7 +9,14 @@ from tests.test_currency_filter import test_currency_filter
 from tests.test_scrape_data import test_scrape_data
 
 if __name__ == "__main__":
-    driver = setup_driver(headless=True)
+    # Parse command-line arguments
+    parser = argparse.ArgumentParser(description="Run web tests on a given URL.")
+    parser.add_argument("--headless", action="store_true", help="Run tests in headless mode")
+    args = parser.parse_args()
+
+    # Setup WebDriver with or without headless mode
+    driver = setup_driver(headless=args.headless)
+
     url = "https://www.alojamiento.io/property/bonita-casa-de-campo-t%c3%adpica-mallorquina/BC-12224317"
 
     # Run each test
@@ -31,7 +39,7 @@ if __name__ == "__main__":
     print("Currency filter test performing")
     run_test(driver, url, test_currency_filter, "Currency filter test")
     print("Currency filter test performed")
-    
+
     print("Script data scrape test performing")
     run_test(driver, url, test_scrape_data, "Script data scrape test")
     print("Script data scrape test performed")

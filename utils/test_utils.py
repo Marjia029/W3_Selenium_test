@@ -2,10 +2,12 @@ import os
 import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment
 
+
 def create_report_directory():
     # Create the reports directory if it doesn't exist
     if not os.path.exists("reports"):
         os.makedirs("reports")
+
 
 def read_existing_reports(filename="reports/test_report.xlsx"):
     """Read the existing Excel file and return a list of rows (test results)."""
@@ -13,13 +15,14 @@ def read_existing_reports(filename="reports/test_report.xlsx"):
     if os.path.isfile(filename):
         workbook = openpyxl.load_workbook(filename)
         sheet = workbook.active
-        
+
         # Skip the header row and read data
         for row in sheet.iter_rows(min_row=2, values_only=True):
             existing_rows.append(list(row))
-        
+
         workbook.close()
     return existing_rows
+
 
 def write_to_xlsx(test_data, filename="reports/test_report.xlsx"):
     create_report_directory()  # Ensure the reports directory exists
@@ -35,7 +38,7 @@ def write_to_xlsx(test_data, filename="reports/test_report.xlsx"):
         except FileNotFoundError:
             workbook = openpyxl.Workbook()
             sheet = workbook.active
-            
+
             # Set up headers with styling
             headers = ['Page URL', 'Test Case', 'Status', 'Comments']
             for col, header in enumerate(headers, start=1):
@@ -46,7 +49,7 @@ def write_to_xlsx(test_data, filename="reports/test_report.xlsx"):
 
         # Flag to track if we updated an existing test result
         updated = False
-        
+
         # Find the last row with data
         last_row = sheet.max_row
 
@@ -67,7 +70,7 @@ def write_to_xlsx(test_data, filename="reports/test_report.xlsx"):
                             cell.font = Font(color="006400")  # Dark Green
                         elif value == 'FAIL':
                             cell.font = Font(color="8B0000")  # Dark Red
-                
+
                 updated = True
                 break
 
@@ -76,7 +79,7 @@ def write_to_xlsx(test_data, filename="reports/test_report.xlsx"):
             last_row += 1
             for col, value in enumerate(test_data, start=1):
                 cell = sheet.cell(row=last_row, column=col, value=value)
-                
+
                 # Color-code status
                 if col == 3:
                     if value == 'PASS':
@@ -102,6 +105,7 @@ def write_to_xlsx(test_data, filename="reports/test_report.xlsx"):
 
     except Exception as e:
         print(f"Error writing to Excel: {e}")
+
 
 def run_test(driver, url, test_func, test_name):
     try:
