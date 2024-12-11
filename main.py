@@ -33,7 +33,7 @@ if __name__ == "__main__":
     print("Image alt attribute test performed")
 
     print("URL status code test performing")
-    #run_test(driver, url, test_url_status, "URL status code test")
+    run_test(driver, url, test_url_status, "URL status code test")
     print("URL status code test performed")
 
     print("Currency filter test performing")
