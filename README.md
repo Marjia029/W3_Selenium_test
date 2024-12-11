@@ -3,8 +3,17 @@
 ## Project Overview
 🚀 This project automates testing for a vacation rental details page using Selenium WebDriver in Python. The script performs comprehensive checks on various aspects of the webpage to ensure quality and SEO compliance.
 
-## Repository
-📂 [GitHub Repository](https://github.com/Marjia029/W3_Selenium_test.git)
+## Table of Contents
+- [Features](#features)
+- [Test Cases Covered](#test-cases-covered)
+- [Prerequisites](#prerequisites)
+- [Project Structure](#project-structure)
+- [Installation](#installation)
+- [Reporting](#reporting)
+- [Customization](#customization)
+- [Troubleshooting](#troubleshooting)
+- [Contributing](#contributing)
+- [Acknowledgments](#acknowledgments)
 
 ## Features
 ✨ **Key Features**:
