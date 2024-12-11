@@ -52,11 +52,11 @@
 
 ## Prerequisites
 📌 **Requirements**:
-- 🐍 Python 3.8+
+- 🐍 Python 3+
 - 🛠️ Selenium WebDriver
 - 🐼 Pandas
 - ⚙️ WebDriver Manager
-- 🌐 Chrome or Firefox Browser
+- 🌐 Chrome Browser
 
 ## Project Structure
 
